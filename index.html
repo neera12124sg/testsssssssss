@@ -126,6 +126,13 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
     <script>
+        // Check if Firebase is defined before proceeding
+        if (typeof firebase === 'undefined') {
+            document.getElementById('registrationList').innerHTML = '<p class="text-red-500 text-center">Firebase SDK failed to load. Check internet connection or console for details.</p>';
+            console.error('Firebase SDK is not loaded.');
+            throw new Error('Firebase SDK not available');
+        }
+
         // Your Firebase config
         const firebaseConfig = {
             apiKey: "AIzaSyBd_y1vpr17LzuE9CjxOlaYHMX6QRGiQR0",
@@ -143,11 +150,10 @@
         try {
             const app = firebase.initializeApp(firebaseConfig);
             database = firebase.database();
-            console.log("Firebase initialized successfully");
+            console.log("Firebase initialized successfully with app:", app.name);
         } catch (error) {
             console.error("Firebase initialization error: ", error.message);
-            document.getElementById('registrationList').innerHTML = `<p class="text-red-500 text-center">Error: ${error.message}</p>`;
-            return;
+            document.getElementById('registrationList').innerHTML = `<p class="text-red-500 text-center">Initialization Error: ${error.message}</p>`;
         }
 
         // Sample data (initially empty, Firebase will handle persistence)
@@ -166,11 +172,12 @@
         function loadRegistrations() {
             const list = document.getElementById('registrationList');
             if (!database) {
-                list.innerHTML = '<p class="text-red-500 text-center">Firebase not initialized.</p>';
+                list.innerHTML = '<p class="text-red-500 text-center">Firebase database not available.</p>';
                 return;
             }
-            list.innerHTML = '<p class="text-gray-500 text-center">Loading registrations...</p>';
+            console.log("Attempting to load registrations from:", database.ref('registrations').toString());
             database.ref('registrations').on('value', (snapshot) => {
+                console.log("Data snapshot received:", snapshot.val());
                 const registrations = [];
                 snapshot.forEach((child) => {
                     registrations.push(child.val());
@@ -187,11 +194,12 @@
                     list.appendChild(div);
                 });
             }, (error) => {
+                console.error("Error loading registrations:", error.message);
                 list.innerHTML = '<p class="text-red-500 text-center">Error loading registrations: ' + error.message + '</p>';
             });
         }
 
-        // Handle form submission
+        // Handle form submission with debugging
         document.getElementById('registrationForm').addEventListener('submit', (e) => {
             e.preventDefault();
             if (!database) {
@@ -205,12 +213,18 @@
                 alert('Please fill all fields and select at least one event.');
                 return;
             }
+            console.log("Submitting registration:", { name, email, events });
             database.ref('registrations').push({ name, email, events })
-                .then(() => {
+                .then((result) => {
+                    console.log("Registration saved with key:", result.key);
                     document.getElementById('registrationForm').reset();
                     alert('Registered successfully!');
+                    loadRegistrations(); // Refresh list after successful save
                 })
-                .catch((error) => alert('Error saving registration: ' + error.message));
+                .catch((error) => {
+                    console.error("Error saving registration:", error.message);
+                    alert('Error saving registration: ' + error.message);
+                });
         });
 
         // Clear data (for demo, requires write access)
@@ -220,9 +234,16 @@
                 return;
             }
             if (confirm('Clear all registrations?')) {
+                console.log("Clearing registrations...");
                 database.ref('registrations').remove()
-                    .then(() => loadRegistrations())
-                    .catch((error) => alert('Error clearing registrations: ' + error.message));
+                    .then(() => {
+                        console.log("Registrations cleared.");
+                        loadRegistrations();
+                    })
+                    .catch((error) => {
+                        console.error("Error clearing registrations:", error.message);
+                        alert('Error clearing registrations: ' + error.message);
+                    });
             }
         });
 
