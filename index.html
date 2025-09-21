@@ -6,6 +6,7 @@
     <title>College Fest 2025 - Register</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://img.icons8.com/color/48/000000/party.png" type="image/png">
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -17,28 +18,28 @@
             background: url('https://images.unsplash.com/photo-1540575467063-1788b6396c44?auto=format&fit=crop&w=1350&q=80') no-repeat center;
             background-size: cover;
             position: relative;
-            padding: 4rem 1rem;
+            padding: 6rem 1rem;
             text-align: center;
         }
         .hero-overlay {
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
         }
         .form-container, .list-container {
             background: white;
             border-radius: 12px;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
+            padding: 2.5rem;
             margin: 2rem auto;
-            max-width: 800px;
+            max-width: 900px;
         }
         .checkbox-group {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1.2rem;
         }
         .checkbox-label {
             background: #f3f4f6;
-            padding: 8px;
+            padding: 10px;
             border-radius: 6px;
             transition: background 0.2s;
         }
@@ -49,7 +50,7 @@
             background: #facc15;
             color: #1f2937;
             font-weight: 600;
-            padding: 12px;
+            padding: 14px;
             border-radius: 8px;
             transition: background 0.3s, transform 0.2s;
         }
@@ -59,7 +60,7 @@
         }
         .registration-item {
             border-bottom: 1px solid #e5e7eb;
-            padding: 1rem 0;
+            padding: 1.2rem 0;
         }
         .registration-item:last-child {
             border-bottom: none;
@@ -71,32 +72,34 @@
     <section class="hero-section">
         <div class="hero-overlay">
             <div class="container mx-auto px-4">
-                <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">College Fest 2025</h1>
-                <p class="text-lg text-gray-200 mb-6">Join the fun! Register for exciting events.</p>
+                <h1 class="text-5xl md:text-6xl font-bold text-white mb-4">College Fest 2025</h1>
+                <p class="text-xl text-gray-200 mb-8">Join the ultimate celebration! Register for epic events.</p>
+                <a href="#form" class="btn inline-block px-8 py-4 text-lg">Sign Up Now</a>
             </div>
         </div>
     </section>
 
     <!-- Registration Form -->
-    <section class="py-8">
+    <section id="form" class="py-10">
         <div class="form-container">
-            <h2 class="text-2xl font-bold mb-6 text-center">Register Now</h2>
-            <form id="registrationForm">
-                <div class="mb-4">
-                    <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
-                    <input type="text" id="name" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg" required>
+            <h2 class="text-3xl font-bold mb-8 text-center">Register for Events</h2>
+            <form id="registrationForm" action="https://formspree.io/f/xdkwngkw" method="POST">
+                <div class="mb-5">
+                    <label for="name" class="block text-base font-medium text-gray-700">Full Name</label>
+                    <input type="text" id="name" name="name" class="mt-1 block w-full p-3 border border-gray-300 rounded-lg" required>
                 </div>
-                <div class="mb-4">
-                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                    <input type="email" id="email" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg" required>
+                <div class="mb-5">
+                    <label for="email" class="block text-base font-medium text-gray-700">Email</label>
+                    <input type="email" id="email" name="email" class="mt-1 block w-full p-3 border border-gray-300 rounded-lg" required>
                 </div>
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Events</label>
+                    <label class="block text-base font-medium text-gray-700 mb-3">Select Events</label>
                     <div class="checkbox-group">
-                        <label class="checkbox-label"><input type="checkbox" value="Hackathon"> Hackathon</label>
-                        <label class="checkbox-label"><input type="checkbox" value="Sports"> Sports</label>
-                        <label class="checkbox-label"><input type="checkbox" value="Quiz"> Quiz</label>
-                        <label class="checkbox-label"><input type="checkbox" value="Dance"> Dance</label>
+                        <label class="checkbox-label"><input type="checkbox" name="events[]" value="Hackathon"> Hackathon</label>
+                        <label class="checkbox-label"><input type="checkbox" name="events[]" value="Sports"> Sports</label>
+                        <label class="checkbox-label"><input type="checkbox" name="events[]" value="Quiz"> Quiz</label>
+                        <label class="checkbox-label"><input type="checkbox" name="events[]" value="Dance"> Dance</label>
+                        <label class="checkbox-label"><input type="checkbox" name="events[]" value="Art"> Art Exhibition</label>
                     </div>
                 </div>
                 <button type="submit" class="btn w-full">Register</button>
@@ -105,32 +108,39 @@
     </section>
 
     <!-- Registered List -->
-    <section class="py-8">
+    <section class="py-10">
         <div class="list-container">
-            <h2 class="text-2xl font-bold mb-6 text-center">Participants</h2>
+            <h2 class="text-3xl font-bold mb-8 text-center">Registered Participants</h2>
             <div id="registrationList"></div>
-            <button id="clearData" class="btn w-full mt-4">Clear All (Demo)</button>
+            <button id="clearData" class="btn w-full mt-6">Clear All (Demo)</button>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="py-6 bg-gray-900 text-white text-center">
-        <p>&copy; 2025 College Fest. All rights reserved.</p>
+    <footer class="py-8 bg-gray-900 text-white text-center">
+        <p class="text-lg">&copy; 2025 College Fest. All rights reserved.</p>
     </footer>
 
     <script>
         const STORAGE_KEY = 'registrations';
 
+        // Sample data for judges
+        const sampleData = [
+            { name: "Alice Smith", email: "alice@example.com", events: ["Hackathon", "Quiz"] },
+            { name: "Bob Jones", email: "bob@example.com", events: ["Sports", "Dance"] },
+            { name: "Carol Lee", email: "carol@example.com", events: ["Quiz", "Art"] }
+        ];
+
         // Load and display registrations
         function loadRegistrations() {
-            const registrations = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            const registrations = JSON.parse(localStorage.getItem(STORAGE_KEY)) || sampleData;
             const list = document.getElementById('registrationList');
             list.innerHTML = registrations.length === 0 ? '<p class="text-gray-500 text-center">No registrations yet.</p>' : '';
             registrations.forEach(reg => {
                 const div = document.createElement('div');
                 div.classList.add('registration-item');
                 div.innerHTML = `
-                    <p class="font-semibold">${reg.name}</p>
+                    <p class="font-semibold text-lg">${reg.name}</p>
                     <p class="text-sm text-gray-600">${reg.email}</p>
                     <p class="text-sm">Events: ${reg.events.join(', ')}</p>
                 `;
@@ -143,22 +153,23 @@
             e.preventDefault();
             const name = document.getElementById('name').value.trim();
             const email = document.getElementById('email').value.trim();
-            const events = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+            const events = Array.from(document.querySelectorAll('input[name="events[]"]:checked')).map(cb => cb.value);
             if (!name || !email || events.length === 0) {
                 alert('Please fill all fields and select at least one event.');
                 return;
             }
+            // Save to LocalStorage for display
             const registrations = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
             registrations.push({ name, email, events });
             localStorage.setItem(STORAGE_KEY, JSON.stringify(registrations));
-            document.getElementById('registrationForm').reset();
-            loadRegistrations();
-            alert('Registered!');
+            // Submit to Formspree
+            const form = document.getElementById('registrationForm');
+            form.submit();
         });
 
         // Clear data
         document.getElementById('clearData').addEventListener('click', () => {
-            if (confirm('Clear all registrations?')) {
+            if (confirm('Clear all local registrations?')) {
                 localStorage.removeItem(STORAGE_KEY);
                 loadRegistrations();
             }
