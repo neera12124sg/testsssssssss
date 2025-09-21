@@ -44,7 +44,9 @@
             position: relative;
             z-index: 2;
             text-align: center;
-            padding: 2rem;
+            padding: 2rem 1rem;
+            max-width: 90%;
+            margin: 0 auto;
             animation: fadeIn 1.5s ease-in-out;
         }
         @keyframes fadeIn {
@@ -52,10 +54,12 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .glow-heading {
-            font-size: 4.5rem;
+            font-size: 3.5rem;
             font-weight: 700;
             text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc, 0 0 30px #00ffcc;
             animation: glow 2s infinite alternate;
+            margin-bottom: 1rem;
+            line-height: 1.2;
         }
         @keyframes glow {
             from { text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc, 0 0 30px #00ffcc; }
@@ -85,7 +89,7 @@
             transform: scale(1.1);
             box-shadow: 0 8px 20px rgba(255, 0, 122, 0.6);
         }
-        .form-container, .list-container {
+        .form-container, .list-container, .thank-you-container {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border-radius: 20px;
@@ -93,6 +97,7 @@
             margin: 2rem auto;
             max-width: 900px;
             border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
         }
         .form-container input {
             background: rgba(255, 255, 255, 0.2);
@@ -142,6 +147,7 @@
             background: #00ffcc;
             border-radius: 50%;
             animation: float 5s infinite;
+            z-index: 0;
         }
         @keyframes float {
             0% { transform: translateY(0); }
@@ -157,6 +163,13 @@
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.5s;
+            z-index: 10;
+        }
+        .thank-you-container {
+            display: none;
+        }
+        .thank-you-container.show {
+            display: block;
         }
         .countdown {
             font-size: 1.5rem;
@@ -164,8 +177,14 @@
             margin: 1rem 0;
         }
         @media (max-width: 768px) {
-            .glow-heading { font-size: 2.5rem; }
-            .form-container, .list-container { margin: 1rem; padding: 1.5rem; }
+            .glow-heading { font-size: 2rem; }
+            .hero-content { padding: 1rem; }
+            .form-container, .list-container, .thank-you-container { margin: 1rem; padding: 1.5rem; }
+            .btn { padding: 0.8rem 1.5rem; }
+        }
+        @media (max-width: 480px) {
+            .glow-heading { font-size: 1.5rem; }
+            .hero-content p { font-size: 1rem; }
         }
     </style>
 </head>
@@ -215,7 +234,7 @@
     <section class="py-10">
         <div class="list-container">
             <h2 class="text-3xl font-bold text-center mb-8 glow-heading">Featured Participants</h2>
-            <div class="parallax" aria-label="Participant List">
+            <div class="parallax" id="participantList" aria-label="Participant List">
                 <div class="parallax-item">
                     <p class="font-semibold text-lg">Ankit Sharma</p>
                     <p class="text-sm">ankit@example.com</p>
@@ -239,6 +258,14 @@
     <section class="py-10 text-center">
         <h2 class="text-3xl font-bold mb-8 glow-heading">Event Highlights</h2>
         <iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ?si=abc123" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </section>
+
+    <!-- Thank You Section -->
+    <section id="thankYouSection" class="thank-you-container">
+        <h2 class="text-3xl font-bold mb-4 glow-heading">Thank You for Participating!</h2>
+        <p class="text-lg mb-4">We’re excited to have you join College Fest 2025!</p>
+        <img src="https://via.placeholder.com/150?text=Celebration+1" alt="Celebration Image 1" class="inline-block mr-4">
+        <img src="https://via.placeholder.com/150?text=Celebration+2" alt="Celebration Image 2" class="inline-block">
     </section>
 
     <!-- Footer with Mode Toggle -->
@@ -286,14 +313,16 @@
         for (let i = 0; i < 20; i++) {
             const particle = document.createElement('div');
             particle.className = 'particle';
-            particle.style.left = `${Math.random() * 100}vw`;
-            particle.style.top = `${Math.random() * 100}vh`;
+            particle.style.left = `${Math.random() * 80}vw`;
+            particle.style.top = `${Math.random() * 80}vh`;
             particle.style.animationDelay = `${Math.random() * 5}s`;
             particlesContainer.appendChild(particle);
         }
 
-        // Form Submission with Confetti
+        // Form Submission with Dynamic Update
         const confetti = document.getElementById('confetti');
+        const participantList = document.getElementById('participantList');
+        const thankYouSection = document.getElementById('thankYouSection');
         document.getElementById('registrationForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const name = document.getElementById('name').value.trim();
@@ -303,10 +332,23 @@
                 alert('Please fill all fields and select at least one event.');
                 return;
             }
-            alert(`Registration successful!\nName: ${name}\nEmail: ${email}\nEvents: ${events.join(', ')}`);
-            document.getElementById('registrationForm').reset();
+            // Add to participant list
+            const newParticipant = document.createElement('div');
+            newParticipant.className = 'parallax-item';
+            newParticipant.innerHTML = `
+                <p class="font-semibold text-lg">${name}</p>
+                <p class="text-sm">${email}</p>
+                <p class="text-sm">Events: ${events.join(', ')}</p>
+            `;
+            participantList.appendChild(newParticipant);
+            // Show thank you section
+            thankYouSection.classList.add('show');
+            // Confetti effect
             confetti.style.opacity = '1';
             setTimeout(() => confetti.style.opacity = '0', 3000);
+            // Alert for confirmation
+            alert(`Registration successful!\nName: ${name}\nEmail: ${email}\nEvents: ${events.join(', ')}`);
+            document.getElementById('registrationForm').reset();
         });
 
         // Parallax Effect
