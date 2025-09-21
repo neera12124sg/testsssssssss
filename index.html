@@ -122,9 +122,9 @@
         <p class="text-lg">&copy; 2025 College Fest. All rights reserved.</p>
     </footer>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+    <!-- Firebase SDK (v10.12.2) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
     <script>
         // Your Firebase config
         const firebaseConfig = {
@@ -138,9 +138,17 @@
             measurementId: "G-8RGKTMXWGD"
         };
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        // Initialize Firebase with error handling
+        let database;
+        try {
+            const app = firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+            console.log("Firebase initialized successfully");
+        } catch (error) {
+            console.error("Firebase initialization error: ", error.message);
+            document.getElementById('registrationList').innerHTML = `<p class="text-red-500 text-center">Error: ${error.message}</p>`;
+            return;
+        }
 
         // Sample data (initially empty, Firebase will handle persistence)
         const sampleData = [
@@ -157,14 +165,18 @@
         // Load and display registrations
         function loadRegistrations() {
             const list = document.getElementById('registrationList');
+            if (!database) {
+                list.innerHTML = '<p class="text-red-500 text-center">Firebase not initialized.</p>';
+                return;
+            }
             list.innerHTML = '<p class="text-gray-500 text-center">Loading registrations...</p>';
-            database.ref('registrations').on('value', snapshot => {
+            database.ref('registrations').on('value', (snapshot) => {
                 const registrations = [];
-                snapshot.forEach(child => {
+                snapshot.forEach((child) => {
                     registrations.push(child.val());
                 });
                 list.innerHTML = registrations.length === 0 ? '<p class="text-gray-500 text-center">No registrations yet.</p>' : '';
-                registrations.forEach(reg => {
+                registrations.forEach((reg) => {
                     const div = document.createElement('div');
                     div.classList.add('registration-item');
                     div.innerHTML = `
@@ -174,12 +186,18 @@
                     `;
                     list.appendChild(div);
                 });
+            }, (error) => {
+                list.innerHTML = '<p class="text-red-500 text-center">Error loading registrations: ' + error.message + '</p>';
             });
         }
 
         // Handle form submission
         document.getElementById('registrationForm').addEventListener('submit', (e) => {
             e.preventDefault();
+            if (!database) {
+                alert('Firebase not initialized. Check console for details.');
+                return;
+            }
             const name = document.getElementById('name').value.trim();
             const email = document.getElementById('email').value.trim();
             const events = Array.from(document.querySelectorAll('input[name="events"]:checked')).map(cb => cb.value);
@@ -187,21 +205,24 @@
                 alert('Please fill all fields and select at least one event.');
                 return;
             }
-            // Save to Firebase
             database.ref('registrations').push({ name, email, events })
                 .then(() => {
                     document.getElementById('registrationForm').reset();
                     alert('Registered successfully!');
                 })
-                .catch(error => alert('Error saving registration: ' + error.message));
+                .catch((error) => alert('Error saving registration: ' + error.message));
         });
 
         // Clear data (for demo, requires write access)
         document.getElementById('clearData').addEventListener('click', () => {
+            if (!database) {
+                alert('Firebase not initialized. Check console for details.');
+                return;
+            }
             if (confirm('Clear all registrations?')) {
                 database.ref('registrations').remove()
                     .then(() => loadRegistrations())
-                    .catch(error => alert('Error clearing registrations: ' + error.message));
+                    .catch((error) => alert('Error clearing registrations: ' + error.message));
             }
         });
 
