@@ -83,7 +83,7 @@
     <section id="form" class="py-10">
         <div class="form-container">
             <h2 class="text-3xl font-bold mb-8 text-center">Register for Events</h2>
-            <form id="registrationForm" action="https://formspree.io/f/xdkwngkw" method="POST">
+            <form id="registrationForm">
                 <div class="mb-5">
                     <label for="name" class="block text-base font-medium text-gray-700">Full Name</label>
                     <input type="text" id="name" name="name" class="mt-1 block w-full p-3 border border-gray-300 rounded-lg" required>
@@ -95,11 +95,11 @@
                 <div class="mb-6">
                     <label class="block text-base font-medium text-gray-700 mb-3">Select Events</label>
                     <div class="checkbox-group">
-                        <label class="checkbox-label"><input type="checkbox" name="events[]" value="Hackathon"> Hackathon</label>
-                        <label class="checkbox-label"><input type="checkbox" name="events[]" value="Sports"> Sports</label>
-                        <label class="checkbox-label"><input type="checkbox" name="events[]" value="Quiz"> Quiz</label>
-                        <label class="checkbox-label"><input type="checkbox" name="events[]" value="Dance"> Dance</label>
-                        <label class="checkbox-label"><input type="checkbox" name="events[]" value="Art"> Art Exhibition</label>
+                        <label class="checkbox-label"><input type="checkbox" name="events" value="Hackathon"> Hackathon</label>
+                        <label class="checkbox-label"><input type="checkbox" name="events" value="Sports"> Sports</label>
+                        <label class="checkbox-label"><input type="checkbox" name="events" value="Quiz"> Quiz</label>
+                        <label class="checkbox-label"><input type="checkbox" name="events" value="Dance"> Dance</label>
+                        <label class="checkbox-label"><input type="checkbox" name="events" value="Art"> Art Exhibition</label>
                     </div>
                 </div>
                 <button type="submit" class="btn w-full">Register</button>
@@ -111,6 +111,7 @@
     <section class="py-10">
         <div class="list-container">
             <h2 class="text-3xl font-bold mb-8 text-center">Registered Participants</h2>
+            <p class="text-sm text-gray-600 text-center mb-4">All registrations are shared and visible to everyone!</p>
             <div id="registrationList"></div>
             <button id="clearData" class="btn w-full mt-6">Clear All (Demo)</button>
         </div>
@@ -121,30 +122,58 @@
         <p class="text-lg">&copy; 2025 College Fest. All rights reserved.</p>
     </footer>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
     <script>
-        const STORAGE_KEY = 'registrations';
+        // Your Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBd_y1vpr17LzuE9CjxOlaYHMX6QRGiQR0",
+            authDomain: "learn-9d055.firebaseapp.com",
+            databaseURL: "https://learn-9d055-default-rtdb.firebaseio.com",
+            projectId: "learn-9d055",
+            storageBucket: "learn-9d055.firebasestorage.app",
+            messagingSenderId: "55772057733",
+            appId: "1:55772057733:web:69a98ac85716402999d9ec",
+            measurementId: "G-8RGKTMXWGD"
+        };
 
-        // Sample data for judges
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Sample data (initially empty, Firebase will handle persistence)
         const sampleData = [
             { name: "Alice Smith", email: "alice@example.com", events: ["Hackathon", "Quiz"] },
             { name: "Bob Jones", email: "bob@example.com", events: ["Sports", "Dance"] },
             { name: "Carol Lee", email: "carol@example.com", events: ["Quiz", "Art"] }
         ];
 
+        // Load sample data to Firebase (run once, comment out after)
+        // sampleData.forEach(reg => {
+        //     database.ref('registrations').push(reg);
+        // });
+
         // Load and display registrations
         function loadRegistrations() {
-            const registrations = JSON.parse(localStorage.getItem(STORAGE_KEY)) || sampleData;
             const list = document.getElementById('registrationList');
-            list.innerHTML = registrations.length === 0 ? '<p class="text-gray-500 text-center">No registrations yet.</p>' : '';
-            registrations.forEach(reg => {
-                const div = document.createElement('div');
-                div.classList.add('registration-item');
-                div.innerHTML = `
-                    <p class="font-semibold text-lg">${reg.name}</p>
-                    <p class="text-sm text-gray-600">${reg.email}</p>
-                    <p class="text-sm">Events: ${reg.events.join(', ')}</p>
-                `;
-                list.appendChild(div);
+            list.innerHTML = '<p class="text-gray-500 text-center">Loading registrations...</p>';
+            database.ref('registrations').on('value', snapshot => {
+                const registrations = [];
+                snapshot.forEach(child => {
+                    registrations.push(child.val());
+                });
+                list.innerHTML = registrations.length === 0 ? '<p class="text-gray-500 text-center">No registrations yet.</p>' : '';
+                registrations.forEach(reg => {
+                    const div = document.createElement('div');
+                    div.classList.add('registration-item');
+                    div.innerHTML = `
+                        <p class="font-semibold text-lg">${reg.name}</p>
+                        <p class="text-sm text-gray-600">${reg.email}</p>
+                        <p class="text-sm">Events: ${reg.events.join(', ')}</p>
+                    `;
+                    list.appendChild(div);
+                });
             });
         }
 
@@ -153,25 +182,26 @@
             e.preventDefault();
             const name = document.getElementById('name').value.trim();
             const email = document.getElementById('email').value.trim();
-            const events = Array.from(document.querySelectorAll('input[name="events[]"]:checked')).map(cb => cb.value);
+            const events = Array.from(document.querySelectorAll('input[name="events"]:checked')).map(cb => cb.value);
             if (!name || !email || events.length === 0) {
                 alert('Please fill all fields and select at least one event.');
                 return;
             }
-            // Save to LocalStorage for display
-            const registrations = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-            registrations.push({ name, email, events });
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(registrations));
-            // Submit to Formspree
-            const form = document.getElementById('registrationForm');
-            form.submit();
+            // Save to Firebase
+            database.ref('registrations').push({ name, email, events })
+                .then(() => {
+                    document.getElementById('registrationForm').reset();
+                    alert('Registered successfully!');
+                })
+                .catch(error => alert('Error saving registration: ' + error.message));
         });
 
-        // Clear data
+        // Clear data (for demo, requires write access)
         document.getElementById('clearData').addEventListener('click', () => {
-            if (confirm('Clear all local registrations?')) {
-                localStorage.removeItem(STORAGE_KEY);
-                loadRegistrations();
+            if (confirm('Clear all registrations?')) {
+                database.ref('registrations').remove()
+                    .then(() => loadRegistrations())
+                    .catch(error => alert('Error clearing registrations: ' + error.message));
             }
         });
 
