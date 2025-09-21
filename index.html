@@ -113,7 +113,8 @@
             <h2 class="text-3xl font-bold mb-8 text-center">Registered Participants</h2>
             <p class="text-sm text-gray-600 text-center mb-4">All registrations are shared and visible to everyone!</p>
             <div id="registrationList"></div>
-            <button id="clearData" class="btn w-full mt-6">Clear All (Demo)</button>
+            <button id="refreshList" class="btn w-full mt-2 mb-4">Refresh List</button>
+            <button id="clearData" class="btn w-full mt-2">Clear All (Demo)</button>
         </div>
     </section>
 
@@ -175,9 +176,9 @@
                 list.innerHTML = '<p class="text-red-500 text-center">Firebase database not available.</p>';
                 return;
             }
-            console.log("Attempting to load registrations from:", database.ref('registrations').toString());
+            console.log("Loading registrations from:", database.ref('registrations').toString());
             database.ref('registrations').on('value', (snapshot) => {
-                console.log("Data snapshot received:", snapshot.val());
+                console.log("Snapshot received:", snapshot.val());
                 const registrations = [];
                 snapshot.forEach((child) => {
                     registrations.push(child.val());
@@ -195,7 +196,7 @@
                 });
             }, (error) => {
                 console.error("Error loading registrations:", error.message);
-                list.innerHTML = '<p class="text-red-500 text-center">Error loading registrations: ' + error.message + '</p>';
+                list.innerHTML = '<p class="text-red-500 text-center">Error loading: ' + error.message + '</p>';
             });
         }
 
@@ -213,18 +214,24 @@
                 alert('Please fill all fields and select at least one event.');
                 return;
             }
-            console.log("Submitting registration:", { name, email, events });
+            console.log("Submitting:", { name, email, events });
             database.ref('registrations').push({ name, email, events })
                 .then((result) => {
-                    console.log("Registration saved with key:", result.key);
+                    console.log("Saved with key:", result.key);
                     document.getElementById('registrationForm').reset();
                     alert('Registered successfully!');
-                    loadRegistrations(); // Refresh list after successful save
+                    loadRegistrations(); // Force refresh
                 })
                 .catch((error) => {
-                    console.error("Error saving registration:", error.message);
-                    alert('Error saving registration: ' + error.message);
+                    console.error("Save error:", error.message);
+                    alert('Error saving: ' + error.message);
                 });
+        });
+
+        // Manual refresh button
+        document.getElementById('refreshList').addEventListener('click', () => {
+            console.log("Manual refresh triggered.");
+            loadRegistrations();
         });
 
         // Clear data (for demo, requires write access)
@@ -237,12 +244,12 @@
                 console.log("Clearing registrations...");
                 database.ref('registrations').remove()
                     .then(() => {
-                        console.log("Registrations cleared.");
+                        console.log("Cleared successfully.");
                         loadRegistrations();
                     })
                     .catch((error) => {
-                        console.error("Error clearing registrations:", error.message);
-                        alert('Error clearing registrations: ' + error.message);
+                        console.error("Clear error:", error.message);
+                        alert('Error clearing: ' + error.message);
                     });
             }
         });
